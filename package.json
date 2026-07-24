@@ -1,7 +1,7 @@
 {
   "name": "com.pollipond.di",
-  "version": "1.0.0",
-  "displayName": "PolliPond DI Extensions",
+  "version": "0.1.0",
+  "displayName": "DI Extensions",
   "description": "VContainer 的擴充工具集，提供自動註冊（AutoRegister）、反射掃描等 DI 相關輔助功能。",
   "unity": "6000.0",
   "author": {

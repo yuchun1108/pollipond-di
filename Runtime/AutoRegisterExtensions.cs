@@ -8,6 +8,9 @@ using VContainer.Unity;
 
 namespace PolliPond.DI
 {
+    /// <summary>
+    /// 提供依據 <see cref="AutoRegisterAttribute"/> 自動註冊類別的擴充方法。
+    /// </summary>
     public static class AutoRegisterExtensions
     {
         static readonly Type[] EntryPointInterfaces =
@@ -27,17 +30,17 @@ namespace PolliPond.DI
 #endif
         };
 
-        // key: 組件前綴組合，value: 該組合下掃描到的所有標記類別
+        // key: 組件名稱前綴；value: 掃描取得的型別及其自動註冊設定。
         static readonly Dictionary<string, List<(Type type, AutoRegisterAttribute attr)>> _cache =
             new();
 
         /// <summary>
-        /// 掃描指定組件前綴下所有標有 [AutoRegister] 的類別並註冊進容器。
+        /// 掃描指定組件並將具有 <see cref="AutoRegisterAttribute"/> 的類別註冊至容器。
         /// </summary>
-        /// <param name="assemblyPrefixes">要掃描的組件名稱前綴，例如 "PolliPond.Game"</param>
-        /// <param name="tag">
-        /// 只註冊 Tag 等於此值的類別；傳 null 時只註冊 Tag 也是 null 的類別（即沒指定 tag 的類別）。
-        /// </param>
+        /// <param name="builder">要加入類別註冊的容器建構器。</param>
+        /// <param name="assemblyPrefixes">要掃描的組件名稱前綴。</param>
+        /// <param name="tag">只註冊具有相同標籤的類別；預設只註冊未設定標籤的類別。</param>
+        /// <exception cref="ArgumentException">未提供任何組件名稱前綴時擲回。</exception>
         public static void RegisterAttributedTypes(
             this IContainerBuilder builder,
             string[] assemblyPrefixes,
@@ -76,6 +79,11 @@ namespace PolliPond.DI
             }
         }
 
+        /// <summary>
+        /// 掃描名稱符合指定前綴的組件，並取得可自動註冊的類別。
+        /// </summary>
+        /// <param name="prefixes">要掃描的組件名稱前綴。</param>
+        /// <returns>可自動註冊的類別及其註冊設定。</returns>
         static List<(Type, AutoRegisterAttribute)> Scan(string[] prefixes)
         {
             var result = new List<(Type, AutoRegisterAttribute)>();
@@ -93,7 +101,7 @@ namespace PolliPond.DI
                 }
                 catch (ReflectionTypeLoadException ex)
                 {
-                    // 部分型別載入失敗時，跳過失敗的，仍處理其餘成功載入的型別
+                    // 若部分型別無法載入，仍保留成功載入的型別繼續掃描。
                     types = ex.Types.Where(t => t != null).ToArray();
                 }
 
